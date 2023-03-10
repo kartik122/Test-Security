@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+# A script that provides chatgpt assisted security vulnerability report of the repository
+
+import sys
+import subprocess
+import os
+import io
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'openai'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'tiktoken'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'retry'])
+from retry import retry
+import openai
+import tiktoken
+import time
+def send_code_report():
+    openai.api_key="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"
+    cwd = os.getcwd()
+    encoding = tiktoken.get_encoding("gpt2")
+    code_report = open("security-report.txt", "w")
+    code_report.close()
+    my_prompt = "Provide security vulnerabilities and suggested code corrections for "
+    for root, dirs, files in os.walk(".", topdown=True):
+        for name in files:
+            if name.endswith(".go") or name.endswith(".ipynb") or name.endswith(".py") or name.endswith(".cpp") or name.endswith(".java") or name.endswith(".js") or name.endswith("jsx") or name.endswith(".html") or name.endswith(".ts") or name.endswith(".tsx"):
+                file_path = os.path.join(root, name)
+                if os.path.getsize(file_path) > 15000:
+                    continue
+                data = ""
+                @retry(Exception, tries=5, delay=1)
+                def process_file():
+                    with io.open(file_path, "r", encoding="utf-8") as text_file:
+                        code_report = open("security-report.txt", "a")
+                        data = text_file.read()
+                        if len(encoding.encode(my_prompt + data)) + 1200 < 4090:
+                            completion = openai.Completion.create(engine="text-davinci-003", prompt = my_prompt + data, max_tokens=1200)
+                            code_report.write( "\n" + "******** " + name + " ********" + " \n")
+                            code_report.write(completion.choices[0]["text"])
+                            code_report.write("\n")
+                            code_report.close()
+                process_file()
+send_code_report()												
+exit(0)
+																																																	     	

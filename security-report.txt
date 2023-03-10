@@ -1,0 +1,34 @@
+
+******** context.tsx ******** 
+
+Security Vulnerabilities: The code does not validate the type of data passed to the setData() method. This means an attacker could inject malicious data into the application.
+
+Suggested Code Corrections: Validate the type of data passed to the setData() method. This can be done by using a typeguard to ensure only valid data is allowed, or by checking for certain properties that are necessary for the data to be valid.
+
+******** main-2.js ******** 
+
+Security Vulnerabilities:
+- There may be a potential vulnerability due to the use of '../../../.storybook/main'. Allowing user input in path segments can allow malicious users to traverse directories and access sensitive files.
+
+Suggested Correction:
+- Limit user input to only known directory paths. For example, only allowing user input in the './src/lib' directory would help reduce the risk of malicious users accessing sensitive files. Additionally, use the path.resolve() function to ensure that the directory paths are properly resolved. 
+
+const rootMain = require(path.resolve(__dirname, '../../../.storybook/main'));
+
+******** main.js ******** 
+
+The code provided do not has any security vulnerabilities.
+
+******** preinstall.js ******** 
+
+// Suggested code corrections
+console.warn('\n============>Make sure you are on Node version 16');
+var majorNodeVersion = process.versions.node.split('.')[0]
+if(Number(majorNodeVersion) < minNodeVersion){
+    console.error('\n============>Error: Your node version is too low. Please run : nvm use '+ minNodeVersion);
+    console.log('\n\n');
+    process.exit(1);   
+} else {
+    console.log('\n============>Your node version is good : node '+ minNodeVersion);
+}
+console.log('\n\n');
